@@ -1,0 +1,24 @@
+apiVersion: v1
+kind: Service
+
+metadata:
+  name: solar-dev-service
+
+  labels:
+    app: solar-dev
+    env: dev
+
+spec:
+
+  type: LoadBalancer
+
+  selector:
+    app: solar-dev
+
+  ports:
+
+  - name: http
+
+    port: 80
+
+    targetPort: 3000
