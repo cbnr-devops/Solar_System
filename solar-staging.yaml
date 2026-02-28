@@ -1,0 +1,26 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: solar-app-staging
+
+spec:
+  replicas: 1
+
+  selector:
+    matchLabels:
+      app: solar-staging
+
+  template:
+    metadata:
+      labels:
+        app: solar-staging
+
+    spec:
+      containers:
+
+      - name: solar
+
+        image: solarsystemacr.azurecr.io/solar-system:v1
+
+        ports:
+        - containerPort: 3000
