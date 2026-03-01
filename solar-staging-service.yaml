@@ -11,6 +11,7 @@ metadata:
 spec:
 
   type: LoadBalancer
+  loadBalancerIP: 40.88.53.95
 
   selector:
     app: solar-staging

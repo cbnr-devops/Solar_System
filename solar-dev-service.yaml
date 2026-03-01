@@ -11,6 +11,7 @@ metadata:
 spec:
 
   type: LoadBalancer
+  loadBalancerIP: 52.151.232.142
 
   selector:
     app: solar-dev
