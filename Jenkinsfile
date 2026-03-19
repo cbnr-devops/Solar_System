@@ -53,5 +53,11 @@ pipeline {
             }
         }
 
+        stage('Build Docker Image') {
+            stage {
+                dockerBuild(IMAGE_NAME, IMAGE_TAG)
+            }
+        }
+
     }
 }
