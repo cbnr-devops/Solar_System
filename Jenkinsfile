@@ -34,5 +34,11 @@ pipeline {
                 owaspScan()
             }
         }
+
+        stage('Unit Test') {
+            steps {
+                unitTest()
+            }
+        }
     }
 }
