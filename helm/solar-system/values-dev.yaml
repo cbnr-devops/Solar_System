@@ -1,6 +1,6 @@
 replicaCount: 1
 
-app: solar-staging
+app: solar-dev
 
 image:
   repository: ""
@@ -8,7 +8,7 @@ image:
   pullPolicy: Always
 
 service:
-  type: LoadBalancer
+  type: ClusterIP
   port: 80
 
 resources:

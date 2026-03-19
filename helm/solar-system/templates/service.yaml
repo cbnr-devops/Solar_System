@@ -5,7 +5,7 @@ metadata:
 spec:
   type: {{ .Values.service.type }}
   selector:
-    app: solar-system
+    app: {{ .Values.app }}
   ports:
     - port: {{ .Values.service.port }}
       targetPort: 3000

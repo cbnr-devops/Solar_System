@@ -6,11 +6,11 @@ spec:
   replicas: {{ .Values.replicaCount }}
   selector:
     matchLabels:
-      app: solar-system
+      app: {{ .Values.app }}
   template:
     metadata:
       labels:
-        app: solar-system
+        app: {{ .Values.app }}
     spec:
       containers:
         - name: solar-system

@@ -1,6 +1,6 @@
 replicaCount: 1
 
-app: solar-staging
+app: solar-system
 
 image:
   repository: ""
