@@ -13,7 +13,7 @@ pipeline {
         AWS_ACCOUNT_ID = '312018064574'
         IMAGE_NAME = 'solar-system'
         IMAGE_TAG = '${BUILD_NUMBER}'
-        ECR_REPOSITORY = 'solar-system'
+        ECR_REPO = 'solar-system'
     }
 
     stages {
@@ -63,6 +63,12 @@ pipeline {
             steps {
                 trivyScan(IMAGE_NAME, IMAGE_TAG)
             }
+        }
+
+        stage('Push Image to ECR') { 
+            steps { 
+                pushToECR(IMAGE_NAME, IMAGE_TAG, AWS_ACCOUNT_ID, AWS_REGION, ECR_REPO) 
+            } 
         }
 
     }
