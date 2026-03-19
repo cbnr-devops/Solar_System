@@ -71,5 +71,16 @@ pipeline {
             } 
         }
 
+        stage('Deploy to Dev Environment') {
+            steps {
+                deployEKS(
+                    "dev-cluster",
+                    AWS_REGION,
+                    "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${ECR_REPO}:${IMAGE_TAG}",
+                    "dev"
+                )
+            }
+        }
+
     }
 }
