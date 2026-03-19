@@ -54,7 +54,7 @@ pipeline {
         }
 
         stage('Build Docker Image') {
-            stage {
+            steps {
                 dockerBuild(IMAGE_NAME, IMAGE_TAG)
             }
         }
