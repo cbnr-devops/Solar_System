@@ -33,14 +33,20 @@ module "eks" {
   source  = "terraform-aws-modules/eks/aws"
   version = "21.15.1"
 
-  cluster_name    = "solar-system-${var.env}"
-  cluster_version = "1.29"
+  cluster_name = "solar-system-${var.env}"
 
-  subnet_ids = module.vpc.private_subnets
+  cluster = {
+    version = "1.29"
+  }
+
   vpc_id     = module.vpc.vpc_id
+  subnet_ids = module.vpc.private_subnets
 
   enable_irsa = true
-  cluster_endpoint_public_access = true
+
+  cluster_endpoint = {
+    public_access = true
+  }
 
   eks_managed_node_groups = {
     default = {
