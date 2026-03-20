@@ -1,6 +1,6 @@
 terraform {
   backend "s3" {
-    bucket         = "solar-system-tf-state"
+    bucket         = "solarsystem-tf-state"
     key            = "staging/terraform.tfstate"
     region         = "ap-southeast-2"
     dynamodb_table = "solar-system-tf-lock"

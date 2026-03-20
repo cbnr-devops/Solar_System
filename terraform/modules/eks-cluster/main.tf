@@ -5,17 +5,34 @@ module "vpc" {
   name = "solar-system-${var.env}-vpc"
   cidr = var.vpc_cidr
 
-  azs             = ["${var.aws_region}a", "${var.aws_region}b"]
-  private_subnets = ["${cidrsubnet(var.vpc_cidr, 8, 1)}", "${cidrsubnet(var.vpc_cidr, 8, 2)}"]
-  public_subnets  = ["${cidrsubnet(var.vpc_cidr, 8, 101)}", "${cidrsubnet(var.vpc_cidr, 8, 102)}"]
+  azs = [
+    "${var.aws_region}a",
+    "${var.aws_region}b"
+  ]
+
+  private_subnets = [
+    cidrsubnet(var.vpc_cidr, 8, 1),
+    cidrsubnet(var.vpc_cidr, 8, 2)
+  ]
+
+  public_subnets = [
+    cidrsubnet(var.vpc_cidr, 8, 101),
+    cidrsubnet(var.vpc_cidr, 8, 102)
+  ]
 
   enable_nat_gateway = true
   single_nat_gateway = true
+
+  tags = {
+    Environment = var.env
+    Project     = "solar-system"
+  }
 }
 
 module "eks" {
-  source          = "terraform-aws-modules/eks/aws"
+  source  = "terraform-aws-modules/eks/aws"
   version = "21.15.1"
+
   cluster_name    = "solar-system-${var.env}"
   cluster_version = "1.29"
 
@@ -23,13 +40,19 @@ module "eks" {
   vpc_id     = module.vpc.vpc_id
 
   enable_irsa = true
+  cluster_endpoint_public_access = true
 
   eks_managed_node_groups = {
     default = {
-      instance_types = ["t3.medium"]
-      min_size       = var.env == "prod" ? 2 : 1
-      max_size       = var.env == "prod" ? 5 : 3
-      desired_size   = var.env == "prod" ? 3 : 2
+      instance_types = var.instance_types
+      min_size       = 2
+      max_size       = 3
+      desired_size   = 2
     }
+  }
+
+  tags = {
+    Environment = var.env
+    Project     = "solar-system"
   }
 }
