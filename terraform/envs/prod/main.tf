@@ -1,4 +1,4 @@
-module "dev_cluster" {
+module "prod_cluster" {
   source         = "../../modules/eks-cluster"
   env            = "dev"
   aws_region     = var.aws_region
