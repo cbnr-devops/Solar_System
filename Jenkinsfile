@@ -8,7 +8,7 @@ pipeline {
     }
 
     parameters {
-        booleanParam(name: 'INFRA_PROVISION', defaultValue: false, description: 'Provision Infra')
+        booleanParam(name: 'INFRA_PROVISION', defaultValue: true, description: 'Provision Infra')
         choice(name: 'ENV', choices: ['dev', 'staging', 'all'], description: 'Environment')
     }
 
