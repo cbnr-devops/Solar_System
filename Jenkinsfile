@@ -35,14 +35,14 @@ pipeline {
                 script {
                     switch(params.ENV) {
                         case 'dev':
-                            terraformApply("env/dev")
+                            terraformApply("terraform/envs/dev")
                             break
                         case 'staging':
-                            terraformApply("env/staging")
+                            terraformApply("terraform/envs/staging")
                             break
                         case 'all':
-                            terraformApply("env/dev")
-                            terraformApply("env/staging")
+                            terraformApply("terraform/envs/dev")
+                            terraformApply("terraform/envs/staging")
                             break
                     }
                 }
