@@ -1,7 +1,7 @@
 @Library('my-shared-lib') _
 
 pipeline {
-    
+
     agent any 
 
     tools {
@@ -20,6 +20,7 @@ pipeline {
         IMAGE_TAG = "${BUILD_NUMBER}"
         ECR_REPO = 'solar-system'
     }
+
 
     stages {
         stage('Checkout') {
