@@ -15,6 +15,7 @@ pipeline {
         ECR_REPO = 'solar-system'
     }
 
+
     stages {
         stage('Checkout') {
             steps {
