@@ -40,6 +40,7 @@ module "eks" {
   subnet_ids = module.vpc.private_subnets
 
   enable_irsa = true
+  create_kms_key = false
 
   cluster_endpoint_public_access = true
 
