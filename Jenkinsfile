@@ -24,25 +24,25 @@ pipeline {
 
         stage('Install Dependencies') {
             steps {
-                installDependencies()
+                installDependencies('npm install')
             }
         }
 
         stage('OWASP Scan') {
             steps {
-                owaspScan()
+                owaspScan(IMAGE_NAME)
             }
         }
 
         stage('Unit Test') {
             steps {
-                unitTest()
+                unitTest('npm test')
             }
         }
 
         stage('SonarQube scan') {
             steps {
-                sonarScan()
+                sonarScan(IMAGE_NAME)
             }
         }
 
@@ -76,7 +76,9 @@ pipeline {
                     "dev-cluster",
                     AWS_REGION,
                     "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${ECR_REPO}:${IMAGE_TAG}",
-                    "dev"
+                    "dev",
+                    "solar",
+                    "./helm/solar-system"
                 )
             }
         }
@@ -95,7 +97,9 @@ pipeline {
                     "staging-cluster",
                     AWS_REGION,
                     "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${ECR_REPO}:${IMAGE_TAG}",
-                    "staging"
+                    "staging",
+                    "solar",
+                    "./helm/solar-system"
                 )
             }
         }
