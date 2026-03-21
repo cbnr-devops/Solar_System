@@ -5,4 +5,6 @@ module "staging_cluster" {
   vpc_cidr   = var.vpc_cidr
 
   instance_types = var.instance_types
+
+  cluster_name = "staging-cluster"
 }

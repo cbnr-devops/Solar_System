@@ -26,3 +26,7 @@ variable "instance_types" {
   default     = ["t3.small"]
 }
 
+variable "cluster_name" {
+  description = "Name of the EKS cluster"
+  type        = string
+}
