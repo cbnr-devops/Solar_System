@@ -32,16 +32,5 @@ spec:
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           ports:
             - containerPort: 3000
-          env:
-            - name: MONGO_USER
-              valueFrom:
-                secretKeyRef:
-                  name: {{ .Values.mongodb.secretName }}
-                  key: MONGO_USER
-            - name: MONGO_PASS
-              valueFrom:
-                secretKeyRef:
-                  name: {{ .Values.mongodb.secretName }}
-                  key: MONGO_PASS
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
