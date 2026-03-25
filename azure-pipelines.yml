@@ -1,0 +1,99 @@
+trigger:
+  branches:
+    include:
+      - "*"
+
+resources:
+  repositories:
+    - repository: templates
+      type: git
+      name: ado-templates-repo
+
+variables:
+  IMAGE_NAME: solar-system
+  IMAGE_TAG: $(Build.BuildId)
+  ACR_NAME: youracrname
+
+stages:
+
+- stage: Build
+  jobs:
+    - job: BuildJob
+      pool:
+        vmImage: ubuntu-latest
+
+      steps:
+        - template: templates/checkout.yml@templates
+        - template: templates/install.yml@templates
+        - template: templates/owasp.yml@templates
+        - template: templates/test.yml@templates
+        - template: templates/sonar.yml@templates
+        - template: templates/quality-gate.yml@templates
+
+        - template: templates/docker-build.yml@templates
+          parameters:
+            imageName: $(IMAGE_NAME)
+            tag: $(IMAGE_TAG)
+
+        - template: templates/trivy.yml@templates
+          parameters:
+            imageName: $(IMAGE_NAME)
+            tag: $(IMAGE_TAG)
+
+        - template: templates/acr-push.yml@templates
+          parameters:
+            imageName: $(IMAGE_NAME)
+            tag: $(IMAGE_TAG)
+            acrName: $(ACR_NAME)
+
+
+- stage: Deploy_Dev
+  dependsOn: Build
+  jobs:
+    - job: DeployDev
+      pool:
+        vmImage: ubuntu-latest
+      steps:
+        - template: templates/deploy.yml@templates
+          parameters:
+            aksCluster: dev-cluster
+            resourceGroup: dev-rg
+            acrName: $(ACR_NAME)
+            imageName: $(IMAGE_NAME)
+            tag: $(IMAGE_TAG)
+            namespace: dev
+            helmPath: ./helm/solar-system
+
+
+- stage: Approval
+  dependsOn: Deploy_Dev
+  condition: eq(variables['Build.SourceBranchName'], 'main')
+
+  jobs:
+    - job: Wait
+      pool: server
+      steps:
+        - task: ManualValidation@0
+          inputs:
+            instructions: "Approve deployment to STAGING"
+            timeoutInMinutes: 60
+
+
+- stage: Deploy_Staging
+  dependsOn: Approval
+  condition: eq(variables['Build.SourceBranchName'], 'main')
+
+  jobs:
+    - job: DeployStaging
+      pool:
+        vmImage: ubuntu-latest
+      steps:
+        - template: templates/deploy.yml@templates
+          parameters:
+            aksCluster: staging-cluster
+            resourceGroup: staging-rg
+            acrName: $(ACR_NAME)
+            imageName: $(IMAGE_NAME)
+            tag: $(IMAGE_TAG)
+            namespace: staging
+            helmPath: ./helm/solar-system
