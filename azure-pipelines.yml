@@ -10,9 +10,13 @@ resources:
       name: ado-templates-repo
 
 variables:
-  IMAGE_NAME: solar-system
-  IMAGE_TAG: $(Build.BuildId)
-  ACR_NAME: youracrname
+  - group: security-keys
+  - name: IMAGE_NAME
+    value: solar-system
+  - name: IMAGE_TAG
+    value: $(Build.BuildId)
+  - name: ACR_NAME
+    value: youracrname
 
 stages:
 
@@ -26,6 +30,8 @@ stages:
         - template: templates/checkout.yml@templates
         - template: templates/install.yml@templates
         - template: templates/owasp.yml@templates
+          parameters:
+            nvdApiKey: $(NVD-API-KEY)
         - template: templates/test.yml@templates
         - template: templates/sonar.yml@templates
         - template: templates/quality-gate.yml@templates
