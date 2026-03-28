@@ -6,8 +6,9 @@ trigger:
 resources:
   repositories:
     - repository: templates
-      type: git
-      name: ado-templates-repo
+      type: github
+      name: cbnr-devops/AZDO-templates
+      endpoint: cbnr-devops
 
 variables:
   - group: security-keys
