@@ -25,7 +25,7 @@ stages:
   jobs:
     - job: BuildJob
       pool:
-        vmImage: ubuntu-latest
+        name: "sample-project"
 
       steps:
         - template: templates/checkout.yml@templates
@@ -59,7 +59,7 @@ stages:
   jobs:
     - job: DeployDev
       pool:
-        vmImage: ubuntu-latest
+        name: "sample-project"
       steps:
         - template: templates/deploy.yml@templates
           parameters:
@@ -93,7 +93,7 @@ stages:
   jobs:
     - job: DeployStaging
       pool:
-        vmImage: ubuntu-latest
+        name: "sample-project"
       steps:
         - template: templates/deploy.yml@templates
           parameters:
