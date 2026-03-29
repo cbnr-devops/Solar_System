@@ -77,7 +77,7 @@ stages:
 
 - stage: Approval
   dependsOn: Deploy_Dev
-  condition: eq(variables['Build.SourceBranchName'], 'main')
+  condition: and(succeeded(), eq(variables['Build.SourceBranchName'], 'main'))
 
   jobs:
     - job: Wait
@@ -91,7 +91,7 @@ stages:
 
 - stage: Deploy_Staging
   dependsOn: Approval
-  condition: eq(variables['Build.SourceBranchName'], 'main')
+  condition: and(succeeded(), eq(variables['Build.SourceBranchName'], 'main'))
 
   jobs:
     - job: DeployStaging
