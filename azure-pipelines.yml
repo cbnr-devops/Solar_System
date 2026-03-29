@@ -17,7 +17,7 @@ variables:
   - name: IMAGE_TAG
     value: $(Build.BuildId)
   - name: ACR_NAME
-    value: youracrname
+    value: skssolar
 
 stages:
 
@@ -64,7 +64,7 @@ stages:
         - template: templates/deploy.yml@templates
           parameters:
             aksCluster: dev-cluster
-            resourceGroup: dev-rg
+            resourceGroup: central-dev-rg
             acrName: $(ACR_NAME)
             imageName: $(IMAGE_NAME)
             tag: $(IMAGE_TAG)
@@ -83,7 +83,7 @@ stages:
         - task: ManualValidation@0
           inputs:
             instructions: "Approve deployment to STAGING"
-            timeoutInMinutes: 60
+            timeoutInMinutes: 10
 
 
 - stage: Deploy_Staging
