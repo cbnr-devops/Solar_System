@@ -35,6 +35,9 @@ stages:
             nvdApiKey: $(NVD-API-KEY)
         - template: templates/test.yml@templates
         - template: templates/sonar.yml@templates
+          parameters:
+            projectKey: 'sks-solar-project_solar-starfleet'
+            projectName: 'solar-starfleet'
         - template: templates/quality-gate.yml@templates
 
         - template: templates/docker-build.yml@templates
