@@ -3,7 +3,7 @@ const fs = require('fs')
 const express = require('express');
 const OS = require('os');
 const bodyParser = require('body-parser');
-const mongoose = require("mongoose");
+const { Pool } = require('pg');
 const app = express();
 const cors = require('cors')
 const serverless = require('serverless-http')
@@ -61,36 +61,32 @@ app.use((req, res, next) => {
     next()
 })
 
-if (process.env.MONGO_URI) {
-    mongoose.connect(process.env.MONGO_URI, {
-        user: process.env.MONGO_USERNAME,
-        pass: process.env.MONGO_PASSWORD,
-        useNewUrlParser: true,
-        useUnifiedTopology: true
-    }, function(err) {
-        if (err) {
-            console.error(`mongo_connection_error error="${err.message}"`)
-        } else {
-            console.log("mongo_connected")
+let postgresPool = null
+const usePostgres = Boolean(process.env.DATABASE_URL) || Boolean(process.env.POSTGRES_HOST)
+
+if (usePostgres) {
+    const poolConfig = process.env.DATABASE_URL
+        ? { connectionString: process.env.DATABASE_URL }
+        : {
+            host: process.env.POSTGRES_HOST,
+            port: Number(process.env.POSTGRES_PORT || 5432),
+            database: process.env.POSTGRES_DB || 'postgres',
+            user: process.env.POSTGRES_USER,
+            password: process.env.POSTGRES_PASSWORD
         }
-    });
+
+    postgresPool = new Pool(poolConfig)
+    postgresPool.connect((err, client, release) => {
+        if (err) {
+            console.error(`postgres_connection_error error="${err.message}"`)
+            return
+        }
+        console.log('postgres_connected')
+        release()
+    })
 } else {
-    console.log("mongo_not_configured running_without_db=true");
+    console.log('postgres_not_configured running_without_db=true')
 }
-
-var Schema = mongoose.Schema;
-
-var dataSchema = new Schema({
-    name: String,
-    id: Number,
-    description: String,
-    image: String,
-    velocity: String,
-    distance: String
-});
-var planetModel = mongoose.model('planets', dataSchema);
-
-
 
 const planetsData = JSON.parse(fs.readFileSync(path.join(__dirname, 'planets.json'), 'utf8'));
 
@@ -121,21 +117,25 @@ app.post('/planet', async function(req, res) {
         return res.send(planet);
     }
 
-    planetModel.findOne({ id: req.body.id }, function(err, planetData) {
+    try {
+        const result = await postgresPool.query(
+            'SELECT id, name, description, image, velocity, distance FROM planets WHERE id = $1 LIMIT 1',
+            [parseInt(req.body.id, 10)]
+        )
+        const planetData = result.rows[0]
         const duration = (Date.now() - start) / 1000
-        if (err) {
-            console.error(`planet_query_error id=${req.body.id} error="${err.message}" duration=${duration.toFixed(3)}s`)
-            res.send("Error in Planet Data");
+        if (planetData) {
+            planetRequestsCounter.inc({ planet_name: planetData.name })
+            console.log(`planet_found id=${req.body.id} name=${planetData.name} source=postgresql duration=${duration.toFixed(3)}s`)
         } else {
-            if (planetData) {
-                planetRequestsCounter.inc({ planet_name: planetData.name })
-                console.log(`planet_found id=${req.body.id} name=${planetData.name} source=mongodb duration=${duration.toFixed(3)}s`)
-            } else {
-                console.warn(`planet_not_found id=${req.body.id} source=mongodb duration=${duration.toFixed(3)}s`)
-            }
-            res.send(planetData);
+            console.warn(`planet_not_found id=${req.body.id} source=postgresql duration=${duration.toFixed(3)}s`)
         }
-    });
+        res.send(planetData);
+    } catch (err) {
+        const duration = (Date.now() - start) / 1000
+        console.error(`planet_query_error id=${req.body.id} error="${err.message}" duration=${duration.toFixed(3)}s`)
+        res.send("Error in Planet Data");
+    }
 });
 
 
