@@ -11,14 +11,14 @@ const serverless = require('serverless-http')
 const client = require('prom-client')
 
 const log = {
-    _emit(level, msg, extra = {}) {
-        const entry = { msg, ...extra }
-        process.stdout.write(JSON.stringify(entry) + '\n')
+    _emit(level, msg) {
+        const timestamp = new Date().toISOString()
+        process.stdout.write(`${timestamp} [${level.toUpperCase()}] ${msg}\n`)
     },
-    debug(msg, extra) { this._emit('debug', msg, extra) },
-    info(msg, extra) { this._emit('info', msg, extra) },
-    warn(msg, extra) { this._emit('warning', msg, extra) },
-    error(msg, extra) { this._emit('error', msg, extra) },
+    debug(msg) { this._emit('debug', msg) },
+    info(msg) { this._emit('info', msg) },
+    warn(msg) { this._emit('warning', msg) },
+    error(msg) { this._emit('error', msg) },
 }
 
 const register = new client.Registry()
@@ -81,21 +81,21 @@ app.use((req, res, next) => {
     activeConnections.inc()
     const start = Date.now()
     const end = httpRequestDuration.startTimer()
-    log.debug('request_started', { trace_id: req.traceId, method: req.method, path: req.path })
+    log.debug(`[${req.traceId}] request_started ${req.method} ${req.path}`)
     res.on('finish', () => {
         const duration = (Date.now() - start) / 1000
         end({ method: req.method, route: req.path, status_code: res.statusCode })
         activeConnections.dec()
-        const meta = { trace_id: req.traceId, method: req.method, path: req.path, status: res.statusCode, duration: `${duration.toFixed(3)}s` }
+        const msg = `[${req.traceId}] request_completed ${req.method} ${req.path} ${res.statusCode} ${duration.toFixed(3)}s`
         if (res.statusCode >= 500) {
-            log.error('request_completed', meta)
+            log.error(msg)
         } else if (res.statusCode >= 400) {
-            log.warn('request_completed', meta)
+            log.warn(msg)
         } else {
-            log.info('request_completed', meta)
+            log.info(msg)
         }
         if (duration > 3) {
-            log.warn('slow_request', { trace_id: req.traceId, method: req.method, path: req.path, duration: `${duration.toFixed(3)}s` })
+            log.warn(`[${req.traceId}] slow_request ${req.method} ${req.path} ${duration.toFixed(3)}s`)
         }
     })
     next()
@@ -119,14 +119,14 @@ if (usePostgres) {
     postgresPool = new Pool(poolConfig)
     postgresPool.connect((err, client, release) => {
         if (err) {
-            log.error('postgres_connection_error', { error: err.message })
+            log.error(`postgres_connection_error ${err.message}`)
             return
         }
         log.info('postgres_connected')
         release()
     })
 } else {
-    log.info('postgres_not_configured', { running_without_db: true })
+    log.info('postgres_not_configured')
 }
 
 const planetsData = JSON.parse(fs.readFileSync(path.join(__dirname, 'planets.json'), 'utf8'));
@@ -134,14 +134,14 @@ const planetsData = JSON.parse(fs.readFileSync(path.join(__dirname, 'planets.jso
 app.post('/planet', async function(req, res) {
     const start = Date.now()
     const traceId = req.traceId
-    log.debug('planet_lookup_start', { trace_id: traceId, id: req.body.id })
+    log.debug(`[${traceId}] planet_lookup_start id=${req.body.id}`)
     if (!req.body.id) {
-        log.error('missing_planet_id', { trace_id: traceId, body: req.body })
+        log.error(`[${traceId}] missing_planet_id`)
         return res.status(400).send({ error: "Missing planet id" });
     }
     const parsedId = parseInt(req.body.id)
     if (isNaN(parsedId) || parsedId < 0) {
-        log.error('invalid_planet_id', { trace_id: traceId, id: req.body.id, reason: isNaN(parsedId) ? 'not_a_number' : 'negative_id' })
+        log.error(`[${traceId}] invalid_planet_id id=${req.body.id}`)
         return res.status(400).send({ error: "Invalid planet id" });
     }
     const delay = Math.floor(Math.random() * 5000);
@@ -149,7 +149,7 @@ app.post('/planet', async function(req, res) {
 
     if (postgresPool) {
         const dbStart = Date.now()
-        log.debug('db_lookup_start', { trace_id: traceId, id: parsedId })
+        log.debug(`[${traceId}] db_lookup_start id=${parsedId}`)
         try {
             const result = await postgresPool.query(
                 'SELECT id, name, description, image, velocity, distance FROM planets WHERE id = $1 LIMIT 1',
@@ -162,18 +162,17 @@ app.post('/planet', async function(req, res) {
                 planetDataSourceCounter.inc({ source: 'db' })
                 planetRequestsCounter.inc({ planet_name: planetData.name })
                 const duration = (Date.now() - start) / 1000
-                log.info('db_lookup_hit', { trace_id: traceId, id: parsedId, name: planetData.name })
-                log.info('planet_found', { trace_id: traceId, id: parsedId, name: planetData.name, source: 'db', duration: `${duration.toFixed(3)}s` })
+                log.info(`[${traceId}] planet_found ${planetData.name} source=db ${duration.toFixed(3)}s`)
                 return res.send(planetData);
             } else {
-                log.warn('db_lookup_miss', { trace_id: traceId, id: parsedId })
+                log.warn(`[${traceId}] db_lookup_miss id=${parsedId}`)
             }
         } catch (err) {
             const dbDuration = (Date.now() - dbStart) / 1000
             planetDbLookupDuration.observe(dbDuration)
             planetDbLookupErrorsCounter.inc()
-            log.error('db_lookup_failed', { trace_id: traceId, id: parsedId, error: err.message })
-            log.info('db_fallback', { trace_id: traceId, id: parsedId })
+            log.error(`[${traceId}] db_lookup_failed id=${parsedId} ${err.message}`)
+            log.info(`[${traceId}] db_fallback id=${parsedId}`)
         }
     }
 
@@ -182,34 +181,34 @@ app.post('/planet', async function(req, res) {
     if (planet) {
         planetDataSourceCounter.inc({ source: 'json' })
         planetRequestsCounter.inc({ planet_name: planet.name })
-        log.info('planet_found', { trace_id: traceId, id: parsedId, name: planet.name, source: 'json', duration: `${duration.toFixed(3)}s` })
+        log.info(`[${traceId}] planet_found ${planet.name} source=json ${duration.toFixed(3)}s`)
     } else {
-        log.warn('planet_not_found', { trace_id: traceId, id: parsedId, source: 'json', duration: `${duration.toFixed(3)}s` })
+        log.warn(`[${traceId}] planet_not_found id=${parsedId} ${duration.toFixed(3)}s`)
     }
     return res.send(planet);
 });
 
 
 app.get('/',   async (req, res) => {
-    log.debug('serving_index', { trace_id: req.traceId, client_ip: req.ip })
+    log.debug('serving_index')
     res.sendFile(path.join(__dirname, '/', 'index.html'));
 });
 
 app.get('/api-docs', (req, res) => {
-    log.debug('api_docs_requested', { trace_id: req.traceId })
+    log.debug('api_docs_requested')
     fs.readFile('oas.json', 'utf8', (err, data) => {
       if (err) {
-        log.error('api_docs_error', { trace_id: req.traceId, error: err.message });
+        log.error(`api_docs_error ${err.message}`);
         res.status(500).send('Error reading file');
       } else {
-        log.debug('api_docs_served', { trace_id: req.traceId, size: `${data.length}bytes` })
+        log.debug('api_docs_served')
         res.json(JSON.parse(data));
       }
     });
   });
 
 app.get('/os',   function(req, res) {
-    log.debug('os_info_requested', { trace_id: req.traceId, hostname: OS.hostname() })
+    log.debug('os_info_requested')
     res.setHeader('Content-Type', 'application/json');
     res.send({
         "os": OS.hostname(),
@@ -238,9 +237,7 @@ app.get('/metrics', async (req, res) => {
 
 if (require.main === module) {
     app.listen(3000, () => {
-        log.info('solar_system_starting', { hostname: OS.hostname(), port: 3000 });
-        log.debug('planets_loaded', { count: planetsData.length, source: 'planets.json' })
-        log.debug('environment', { node_env: process.env.NODE_ENV || 'development', mongo_configured: !!process.env.MONGO_URI })
+        log.info(`solar_system_starting on port 3000`)
     });
 }
 
