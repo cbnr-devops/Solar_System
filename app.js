@@ -12,7 +12,7 @@ const client = require('prom-client')
 
 const log = {
     _emit(level, msg, extra = {}) {
-        const entry = { timestamp: new Date().toISOString(), level, msg, ...extra }
+        const entry = { msg, ...extra }
         process.stdout.write(JSON.stringify(entry) + '\n')
     },
     debug(msg, extra) { this._emit('debug', msg, extra) },
