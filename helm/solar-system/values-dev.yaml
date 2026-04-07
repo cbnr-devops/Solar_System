@@ -18,3 +18,10 @@ resources:
   requests:
     cpu: 250m
     memory: 256Mi
+
+hpa:
+  enabled: true
+  minReplicas: 2
+  maxReplicas: 10
+  cpuUtilization: 50
+  memoryUtilization: 70
