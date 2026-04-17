@@ -1,0 +1,16 @@
+apiVersion: azmonitoring.coreos.com/v1
+kind: PodMonitor
+metadata:
+  name: solar-system
+  namespace: dev
+spec:
+  selector:
+    matchLabels:
+      app: solar-system
+  namespaceSelector:
+    matchNames:
+      - dev
+  podMetricsEndpoints:
+    - port: http
+      path: /solar/metrics
+      interval: 30s
