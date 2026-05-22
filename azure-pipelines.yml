@@ -101,7 +101,7 @@ stages:
         - template: templates/deploy.yml@templates
           parameters:
             aksCluster: staging-cluster
-            resourceGroup: staging-rg
+            resourceGroup: central-staging-rg
             acrName: $(ACR_NAME)
             imageName: $(IMAGE_NAME)
             tag: $(IMAGE_TAG)
