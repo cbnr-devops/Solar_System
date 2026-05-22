@@ -34,10 +34,10 @@ stages:
           parameters:
             nvdApiKey: $(NVD-API-KEY)
         - template: templates/test.yml@templates
-        #- template: templates/sonar.yml@templates
-        #  parameters:
-        #    projectKey: 'sk-solar-project_solar-system'
-        #    projectName: 'solar-system'
+        - template: templates/sonar.yml@templates
+          parameters:
+            projectKey: 'sk-solar-project_solar-system'
+            projectName: 'solar-system'
         #- template: templates/quality-gate.yml@templates
 
         - template: templates/docker-build.yml@templates
