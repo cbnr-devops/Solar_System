@@ -1,6 +1,6 @@
 replicaCount: 2
-
-app: solar-staging
+app: solar-system
+env: staging
 
 image:
   repository: ""
@@ -10,6 +10,9 @@ image:
 service:
   type: ClusterIP
   port: 80
+  labels:
+    tier: backend
+    env: staging
 
 resources:
   limits:
@@ -18,3 +21,10 @@ resources:
   requests:
     cpu: 250m
     memory: 256Mi
+
+hpa:
+  enabled: true
+  minReplicas: 2
+  maxReplicas: 10
+  cpuUtilization: 5
+  memoryUtilization: 20
