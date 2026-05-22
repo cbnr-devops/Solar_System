@@ -36,7 +36,7 @@ stages:
         - template: templates/test.yml@templates
         - template: templates/sonar.yml@templates
           parameters:
-            projectKey: 'sks-solar-project_solar-system'
+            projectKey: 'sk-solar-project_solar-system'
             projectName: 'solar-system'
         #- template: templates/quality-gate.yml@templates
 
