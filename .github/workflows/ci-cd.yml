@@ -1,0 +1,61 @@
+name: CI/CD - solar-system
+
+on:
+  push:
+    branches:
+      - '*'
+  pull_request:
+
+jobs:
+  build:
+    uses: cbnr-devops/GitHub-reusable-workflows/.github/workflows/build.yml@v1
+    with:
+      image_name: solar-system
+      image_tag: ${{ github.run_number }}
+      install_command: npm ci
+      test_command: npm test
+
+      owasp_enabled: true
+      owasp_project_name: solar-system
+
+      sonar_enabled: true
+      sonar_project_key: sk-solar-project_solar-system
+      sonar_project_name: solar-system
+
+      trivy_enabled: true
+
+      aws_region: eu-central-1           
+      aws_account_id: ${{ secrets.AWS_ACCOUNT_ID }}
+      ecr_repository: solar-system
+
+    secrets:
+      NVD_API_KEY: ${{ secrets.NVD_API_KEY }}
+      SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+
+  deploy_dev:
+    needs: build
+    uses: cbnr-devops/GitHub-reusable-workflows/.github/workflows/deploy.yml@v1
+    with:
+      environment: dev
+      cluster_name: dev-cluster
+      aws_region: eu-central-1               
+      namespace: dev
+      helm_path: ./helm/solar-system
+      release_name: solar-system
+      image_name: ${{ needs.build.outputs.built_image_name }}
+      image_tag: ${{ needs.build.outputs.built_image_tag }}
+
+  deploy_staging:
+    if: github.ref_name == 'main'
+    needs: deploy_dev
+    uses: cbnr-devops/GitHub-reusable-workflows/.github/workflows/deploy.yml@v1
+    with:
+      environment: staging
+      cluster_name: staging-cluster
+      aws_region: eu-central-1
+      namespace: staging
+      helm_path: ./helm/solar-system
+      release_name: solar-system
+      image_name: ${{ needs.build.outputs.built_image_name }}
+      image_tag: ${{ needs.build.outputs.built_image_tag }}
+    environment: staging
