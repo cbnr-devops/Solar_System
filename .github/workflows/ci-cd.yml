@@ -8,7 +8,7 @@ on:
 
 jobs:
   build:
-    uses: cbnr-devops/GitHub-reusable-workflows/.github/workflows/build.yml@v1
+    uses: cbnr-devops/GitHub-reusable-workflows/.github/workflows/build.yml@sks-16
     with:
       image_name: solar-system
       image_tag: ${{ github.run_number }}
@@ -24,7 +24,7 @@ jobs:
 
       trivy_enabled: true
 
-      aws_region: eu-central-1           
+      aws_region: ap-southeast-2           
       aws_account_id: ${{ secrets.AWS_ACCOUNT_ID }}
       ecr_repository: solar-system
 
@@ -34,11 +34,11 @@ jobs:
 
   deploy_dev:
     needs: build
-    uses: cbnr-devops/GitHub-reusable-workflows/.github/workflows/deploy.yml@v1
+    uses: cbnr-devops/GitHub-reusable-workflows/.github/workflows/deploy.yml@sks-16
     with:
       environment: dev
       cluster_name: dev-cluster
-      aws_region: eu-central-1               
+      aws_region: ap-southeast-2               
       namespace: dev
       helm_path: ./helm/solar-system
       release_name: solar-system
@@ -48,11 +48,11 @@ jobs:
   deploy_staging:
     if: github.ref_name == 'main'
     needs: deploy_dev
-    uses: cbnr-devops/GitHub-reusable-workflows/.github/workflows/deploy.yml@v1
+    uses: cbnr-devops/GitHub-reusable-workflows/.github/workflows/deploy.yml@sks-16
     with:
       environment: staging
       cluster_name: staging-cluster
-      aws_region: eu-central-1
+      aws_region: ap-southeast-2
       namespace: staging
       helm_path: ./helm/solar-system
       release_name: solar-system
