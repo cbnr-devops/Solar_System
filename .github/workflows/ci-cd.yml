@@ -7,6 +7,10 @@ on:
   pull_request:
   workflow_dispatch:
 
+permissions:
+  id-token: write
+  contents: read
+
 jobs:
   build:
     uses: cbnr-devops/GitHub-reusable-workflows/.github/workflows/build.yml@sks-16
