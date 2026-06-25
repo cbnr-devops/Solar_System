@@ -4,9 +4,17 @@ on:
   push:
     branches:
       - '*'
-  pull_request:
   workflow_dispatch:
-
+    inputs: 
+      environment:
+        description: 'Environment to deploy to'
+        required: true
+        default: 'dev'
+        type: string
+        options:
+          - dev
+          - staging
+          - production
 permissions:
   id-token: write
   contents: read
