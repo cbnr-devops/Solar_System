@@ -25,7 +25,7 @@ jobs:
       trivy_enabled: true
 
       aws_region: ap-southeast-2           
-      aws_account_id: ${{ secrets.AWS_ACCOUNT_ID }}
+      aws_account_id: ${{ github.repository_owner == 'cbnr-devops' && '987569578177' || '' }}
       ecr_repository: solar-system
 
     secrets:
@@ -61,6 +61,5 @@ jobs:
       release_name: solar-system
       image_name: ${{ needs.build.outputs.built_image_name }}
       image_tag: ${{ needs.build.outputs.built_image_tag }}
-    environment: staging
     secrets:
       CI_ROLE_ARN: ${{ secrets.CI_ROLE_ARN }}
