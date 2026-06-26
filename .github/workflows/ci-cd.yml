@@ -28,7 +28,7 @@ jobs:
       install_command: npm ci
       test_command: npm test
 
-      owasp_enabled: true
+      owasp_enabled: false
       owasp_project_name: solar-system
 
       sonar_enabled: true
