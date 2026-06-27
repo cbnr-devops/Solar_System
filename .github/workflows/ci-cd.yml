@@ -57,7 +57,7 @@ jobs:
       helm_path: ./helm/solar-system
       values_file: values-dev.yaml
       release_name: solar-system
-      image_name: solar-system
+      image_name: 987569578177.dkr.ecr.ap-southeast-2.amazonaws.com/solar-system
       image_tag: ${{ github.run_number }}
     secrets:
       CI_ROLE_ARN: ${{ secrets.CI_ROLE_ARN }}
