@@ -55,6 +55,7 @@ jobs:
       aws_region: ap-southeast-2               
       namespace: dev
       helm_path: ./helm/solar-system
+      values_file: values-dev.yaml
       release_name: solar-system
       image_name: ${{ needs.build.outputs.built_image_name }}
       image_tag: ${{ needs.build.outputs.built_image_tag }}
