@@ -57,8 +57,8 @@ jobs:
       helm_path: ./helm/solar-system
       values_file: values-dev.yaml
       release_name: solar-system
-      image_name: ${{ needs.build.outputs.built_image_name }}
-      image_tag: ${{ needs.build.outputs.built_image_tag }}
+      image_name: solar-system
+      image_tag: ${{ github.run_number }}
     secrets:
       CI_ROLE_ARN: ${{ secrets.CI_ROLE_ARN }}
 
