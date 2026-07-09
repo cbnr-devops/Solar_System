@@ -73,6 +73,8 @@ stages:
             tag: $(IMAGE_TAG)
             namespace: dev
             helmPath: ./helm/solar-system
+            wait: true
+            atomic: false
 
 
 - stage: Approval
@@ -107,3 +109,5 @@ stages:
             tag: $(IMAGE_TAG)
             namespace: staging
             helmPath: ./helm/solar-system
+            wait: true
+            atomic: true
