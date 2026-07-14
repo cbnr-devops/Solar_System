@@ -1,3 +1,49 @@
+{{- if .Values.blueGreen.enabled }}
+{{- range $slot := list "blue" "green" }}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: solar-system-{{ $slot }}
+  labels:
+    app: {{ $.Values.app }}
+    slot: {{ $slot }}
+spec:
+  replicas: {{ $.Values.replicaCount }}
+  selector:
+    matchLabels:
+      app: {{ $.Values.app }}
+      slot: {{ $slot }}
+  template:
+    metadata:
+      labels:
+        app: {{ $.Values.app }}
+        slot: {{ $slot }}
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "3000"
+        prometheus.io/path: "/metrics"
+    spec:
+      topologySpreadConstraints:
+        - maxSkew: 1
+          topologyKey: topology.kubernetes.io/zone
+          whenUnsatisfiable: ScheduleAnyway
+          labelSelector:
+            matchLabels:
+              app: {{ $.Values.app }}
+              slot: {{ $slot }}
+        - maxSkew: 1
+          topologyKey: kubernetes.io/hostname
+          whenUnsatisfiable: ScheduleAnyway
+          labelSelector:
+            matchLabels:
+              app: {{ $.Values.app }}
+              slot: {{ $slot }}
+      containers:
+        {{- $ctx := dict "Values" $.Values "slot" $slot }}
+        {{- include "solar-system.container" $ctx | nindent 8 }}
+{{- end }}
+{{- else }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -23,56 +69,13 @@ spec:
           labelSelector:
             matchLabels:
               app: {{ .Values.app }}
-        
         - maxSkew: 1
           topologyKey: kubernetes.io/hostname
           whenUnsatisfiable: ScheduleAnyway
           labelSelector:
             matchLabels:
               app: {{ .Values.app }}
-
       containers:
-        - name: solar-system
-          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
-          ports:
-            - containerPort: 3000
-          startupProbe:
-            httpGet:
-              path: /live
-              port: 3000
-            failureThreshold: 30
-            periodSeconds: 5
-          readinessProbe:
-            httpGet:
-              path: /ready
-              port: 3000
-            initialDelaySeconds: 5
-            periodSeconds: 10
-            timeoutSeconds: 2
-            failureThreshold: 3
-          livenessProbe:
-            httpGet:
-              path: /live
-              port: 3000
-            initialDelaySeconds: 15
-            periodSeconds: 20
-            timeoutSeconds: 2
-            failureThreshold: 3
-          env:                                    
-            - name: POSTGRES_USER
-              valueFrom:
-                secretKeyRef:
-                  name: postgres-secret
-                  key: POSTGRES_USER
-            - name: POSTGRES_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: postgres-secret
-                  key: POSTGRES_PASSWORD
-            - name: POSTGRES_HOST
-              valueFrom:
-                secretKeyRef:
-                  name: postgres-secret
-                  key: POSTGRES_HOST
-          resources:
-            {{- toYaml .Values.resources | nindent 12 }}
+        {{- $ctx := dict "Values" .Values "slot" "" }}
+        {{- include "solar-system.container" $ctx | nindent 8 }}
+{{- end }}

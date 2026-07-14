@@ -10,6 +10,9 @@ spec:
   type: {{ .Values.service.type }}
   selector:
     app: {{ .Values.app }}
+    {{- if .Values.blueGreen.enabled }}
+    slot: {{ .Values.blueGreen.activeSlot }}
+    {{- end }}
   ports:
     - port: {{ .Values.service.port }}
       targetPort: 3000

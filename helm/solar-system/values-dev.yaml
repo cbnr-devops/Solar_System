@@ -1,6 +1,7 @@
 replicaCount: 2
 app: solar-system
 env: dev
+
 image:
   repository: ""
   tag: latest
@@ -12,6 +13,9 @@ service:
   labels:
     tier: backend
     env: dev
+
+blueGreen:
+  enabled: false
 
 resources:
   limits:

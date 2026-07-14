@@ -14,6 +14,15 @@ service:
     tier: backend
     env: staging
 
+blueGreen:
+  enabled: true
+  activeSlot: blue
+  slots:
+    blue:
+      imageTag: ""
+    green:
+      imageTag: ""
+
 resources:
   limits:
     cpu: 500m

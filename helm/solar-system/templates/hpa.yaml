@@ -8,7 +8,7 @@ spec:
   scaleTargetRef:
     apiVersion: apps/v1
     kind: Deployment
-    name: solar-system
+    name: {{ if .Values.blueGreen.enabled }}solar-system-{{ .Values.blueGreen.activeSlot }}{{ else }}solar-system{{ end }}
   minReplicas: {{ .Values.hpa.minReplicas }}
   maxReplicas: {{ .Values.hpa.maxReplicas }}
   metrics:

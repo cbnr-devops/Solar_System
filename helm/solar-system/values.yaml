@@ -1,6 +1,7 @@
 replicaCount: 1
 
 app: solar-system
+env: default
 
 image:
   repository: ""
@@ -11,6 +12,15 @@ service:
   type: ClusterIP
   port: 80
 
+blueGreen:
+  enabled: false
+  activeSlot: blue
+  slots:
+    blue:
+      imageTag: ""
+    green:
+      imageTag: ""
+
 resources:
   limits:
     cpu: 500m
@@ -18,3 +28,10 @@ resources:
   requests:
     cpu: 250m
     memory: 256Mi
+
+hpa:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 3
+  cpuUtilization: 70
+  memoryUtilization: 80
