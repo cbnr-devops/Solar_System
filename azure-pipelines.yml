@@ -38,6 +38,7 @@ stages:
           parameters:
             projectKey: 'sk-solar-project_solar-system'
             projectName: 'solar-system'
+            serviceConnection: 'sonarcloud-connection'
         #- template: templates/quality-gate.yml@templates
 
         - template: templates/docker-build.yml@templates
