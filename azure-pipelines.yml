@@ -32,7 +32,7 @@ stages:
         - template: templates/install.yml@templates
         - template: templates/owasp.yml@templates
           parameters:
-            nvdApiKey: $(NVD-API-KEY)
+            nvdApiKey: $(NVD_API_KEY)
         - template: templates/test.yml@templates
         - template: templates/sonar.yml@templates
           parameters:
