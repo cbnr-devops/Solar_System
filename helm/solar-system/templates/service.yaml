@@ -16,3 +16,26 @@ spec:
   ports:
     - port: {{ .Values.service.port }}
       targetPort: 3000
+{{- if .Values.blueGreen.enabled }}
+{{- $previewSlot := "green" }}
+{{- if eq .Values.blueGreen.activeSlot "green" }}
+{{- $previewSlot = "blue" }}
+{{- end }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: solar-system-preview-service
+  labels:
+    app: {{ .Values.app }}
+    tier: backend
+    env: {{ .Values.env }}
+spec:
+  type: {{ .Values.service.type }}
+  selector:
+    app: {{ .Values.app }}
+    slot: {{ $previewSlot }}
+  ports:
+    - port: {{ .Values.service.port }}
+      targetPort: 3000
+{{- end }}
