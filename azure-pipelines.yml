@@ -20,7 +20,6 @@ variables:
     value: skssolar
 
 stages:
-
 - stage: Build
   jobs:
     - job: BuildJob
@@ -34,7 +33,7 @@ stages:
           parameters:
             nvdApiKey: $(NVD_API_KEY)
         - template: templates/test.yml@templates
-        - template: templates/sonar.yml@templates
+        #- template: templates/sonar.yml@templates
           parameters:
             projectKey: 'sk-solar-project_solar-system'
             projectName: 'solar-system'
