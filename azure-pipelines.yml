@@ -76,7 +76,7 @@ stages:
             deploymentStrategy: rolling
             wait: true
             atomic: false
-            timeout: 5m
+            timeout: 10m
 
 
 - stage: Approval
@@ -114,4 +114,4 @@ stages:
             deploymentStrategy: blueGreen
             wait: true
             atomic: true
-            timeout: 5m
+            timeout: 10m
