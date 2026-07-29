@@ -15,7 +15,13 @@ service:
     env: dev
 
 blueGreen:
-  enabled: false
+  enabled: true
+  activeSlot: blue
+  slots:
+    blue:
+      imageTag: ""
+    green:
+      imageTag: ""
 
 resources:
   limits:

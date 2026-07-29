@@ -73,9 +73,9 @@ stages:
             tag: $(IMAGE_TAG)
             namespace: dev
             helmPath: ./helm/solar-system
-            deploymentStrategy: rolling
+            deploymentStrategy: blueGreen
             wait: true
-            atomic: false
+            atomic: true
             timeout: 10m
 
 
