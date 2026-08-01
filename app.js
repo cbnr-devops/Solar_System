@@ -34,8 +34,15 @@ const planetRequestsCounter = new client.Counter({
 const httpRequestDuration = new client.Histogram({
     name: 'http_request_duration_seconds',
     help: 'Duration of HTTP requests in seconds',
-    labelNames: ['method', 'route', 'status_code'],
+    labelNames: ['service', 'method', 'route', 'status'],
     buckets: [0.01, 0.05, 0.1, 0.3, 0.5, 1, 2, 5],
+    registers: [register]
+})
+
+const httpRequestsCounter = new client.Counter({
+    name: 'http_requests_total',
+    help: 'Total number of HTTP requests',
+    labelNames: ['service', 'method', 'route', 'status'],
     registers: [register]
 })
 
@@ -84,7 +91,14 @@ app.use((req, res, next) => {
     log.debug(`[${req.traceId}] request_started ${req.method} ${req.path}`)
     res.on('finish', () => {
         const duration = (Date.now() - start) / 1000
-        end({ method: req.method, route: req.path, status_code: res.statusCode })
+        const labels = {
+            service: 'solar-system',
+            method: req.method,
+            route: req.route?.path || req.path,
+            status: String(res.statusCode)
+        }
+        end(labels)
+        httpRequestsCounter.inc(labels)
         activeConnections.dec()
         const msg = `[${req.traceId}] request_completed ${req.method} ${req.path} ${res.statusCode} ${duration.toFixed(3)}s`
         if (res.statusCode >= 500) {
