@@ -4,6 +4,8 @@ on:
   push:
     branches:
       - '*'
+  pull_request:
+    types: [opened, edited, reopened, synchronize, ready_for_review]
   workflow_dispatch:
     inputs: 
       environment:
@@ -21,7 +23,8 @@ permissions:
 
 jobs:
   build:
-    uses: cbnr-devops/GitHub-reusable-workflows/.github/workflows/build.yml@sks-16
+    name: Build
+    uses: cbnr-devops/GitHub-reusable-workflows/.github/workflows/build.yml@main
     with:
       image_name: solar-system
       image_tag: ${{ github.run_number }}
@@ -47,8 +50,10 @@ jobs:
       CI_ROLE_ARN:  ${{ secrets.CI_ROLE_ARN }}
 
   deploy_dev:
+    name: Deploy dev
+    if: github.event_name != 'pull_request'
     needs: build
-    uses: cbnr-devops/GitHub-reusable-workflows/.github/workflows/deploy.yml@sks-16
+    uses: cbnr-devops/GitHub-reusable-workflows/.github/workflows/deploy.yml@main
     with:
       environment: dev
       cluster_name: dev-cluster
@@ -63,9 +68,10 @@ jobs:
       CI_ROLE_ARN: ${{ secrets.CI_ROLE_ARN }}
 
   deploy_staging:
-    if: github.ref_name == 'main'
+    name: Deploy staging
+    if: github.event_name != 'pull_request' && github.ref_name == 'main'
     needs: deploy_dev
-    uses: cbnr-devops/GitHub-reusable-workflows/.github/workflows/deploy.yml@sks-16
+    uses: cbnr-devops/GitHub-reusable-workflows/.github/workflows/deploy.yml@main
     with:
       environment: staging
       cluster_name: staging-cluster
