@@ -19,13 +19,15 @@ variables:
   - name: ACR_NAME
     value: skssolar
 
+pool:
+  name: central-infra-mdp
+  demands:
+    - ImageOverride -equals central-custom-linux
+
 stages:
 - stage: Build
   jobs:
     - job: BuildJob
-      pool:
-        name: "sample-project"
-
       steps:
         - template: templates/checkout.yml@templates
         - template: templates/install.yml@templates
@@ -33,12 +35,7 @@ stages:
           parameters:
             nvdApiKey: $(NVD_API_KEY)
         - template: templates/test.yml@templates
-        #- template: templates/sonar.yml@templates
-          parameters:
-            projectKey: 'sk-solar-project_solar-system'
-            projectName: 'solar-system'
-            serviceConnection: 'sonarcloud-connection'
-        #- template: templates/quality-gate.yml@templates
+        # SonarCloud and its quality gate can be restored when required.
 
         - template: templates/docker-build.yml@templates
           parameters:
@@ -61,8 +58,6 @@ stages:
   dependsOn: Build
   jobs:
     - job: DeployDev
-      pool:
-        name: "sample-project"
       steps:
         - template: templates/deploy.yml@templates
           parameters:
@@ -99,8 +94,6 @@ stages:
 
   jobs:
     - job: DeployStaging
-      pool:
-        name: "sample-project"
       steps:
         - template: templates/deploy.yml@templates
           parameters:
